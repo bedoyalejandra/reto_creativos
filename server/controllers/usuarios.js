@@ -31,8 +31,7 @@ let guardar_usuario = async (usuario) => {
                   $5,
                   $6,
                   $7,
-                  $8,
-                  md5($9)
+                  md5($8)
                   );`;
 
   let values = [
@@ -88,14 +87,14 @@ let eliminar_usuario = (identificacion) => {
 
 let editar_usuario = async (usuario, identificacion) => {
   let _service = new ServicePG();
-  let sql = `UPDATE usuarios set tipo_identificacion = $1
+  let sql = `UPDATE usuarios set tipo_identificacion = $1,
                  nombres = $2,
                  apellidos = $3,
                  correo = $4,
                  rol = $5,
-                 celular = $6
-                 clave = md5($7),
-                 WHERE identificacion= $8`;
+                 celular = $6,
+                 clave = md5($7)
+                 WHERE identificacion = $8`;
 
   let values = [
     usuario.tipo_identificacion,

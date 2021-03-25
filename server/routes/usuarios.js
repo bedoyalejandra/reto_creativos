@@ -73,7 +73,7 @@ router.post("/usuarios", (req, res) => {
 /**
  * Eliminar un usuario
  */
-router.delete("/usuario/:id", (req, res) => {
+router.delete("/usuarios/:id", (req, res) => {
     try {
       //Capturar el body desde la solicitud
       let usuario = req.params.id;
