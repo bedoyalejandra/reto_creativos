@@ -60,8 +60,7 @@ let ver_usuarios = async () => {
                     INNER JOIN roles ON usuarios.rol = roles.id 
                     INNER JOIN tipos_identificacion ON usuarios.tipo_identificacion = tipos_identificacion.id;`;
   let respuesta = await _service.runSql(sql);
-  let result = respuesta.rows;
-  return result;
+  return respuesta;
 };
 
 let ver_usuario = async (identificacion) => {
@@ -94,8 +93,9 @@ let editar_usuario = async (usuario, identificacion) => {
                  apellidos = $3,
                  correo = $4,
                  rol = $5,
-                 celular = $6,
-                 WHERE identificacion= $7`;
+                 celular = $6
+                 clave = md5($7),
+                 WHERE identificacion= $8`;
 
   let values = [
     usuario.tipo_identificacion,
@@ -104,22 +104,13 @@ let editar_usuario = async (usuario, identificacion) => {
     usuario.correo,
     usuario.rol,
     usuario.celular,
+    usuario.clave,
     identificacion,
   ];
   let respuesta = await _service.runSql(sql, values);
   return respuesta;
 };
 
-let editar_clave = async (clave, identificacion) => {
-  let _service = new ServicePG();
-  let sql = `UPDATE usuarios set
-                 clave = md5($1)
-                 WHERE identificacion = $2`;
-
-  let values = [clave.clave_nueva, identificacion];
-  let respuesta = await _service.runSql(sql, values);
-  return respuesta;
-};
 
 module.exports = {
   validar_usuario,
@@ -128,5 +119,4 @@ module.exports = {
   editar_usuario,
   ver_usuarios,
   ver_usuario,
-  editar_clave,
 };
