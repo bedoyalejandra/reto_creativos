@@ -15,15 +15,13 @@ export default {
       dialog: false,
       dialogDelete: false,
       valid: false,
-      toast: false,
-      usuario: {},
-      reglas: [v => !!v || "El campo es obligatorio."],
-      reglaCorreo: [
-        v => /.+@.+\..+/.test(v) || "El correo no es correcto."
-      ],
-    
+      reglas: [(v) => !!v || "El campo es obligatorio."],
+      reglaCorreo: [(v) => /.+@.+\..+/.test(v) || "El correo no es correcto."],
+
       roles: [{ value: null, text: "Seleccione un rol", disabled: true }],
-      tipo_documentos: [{ value: null, text: "Seleccione un tipo", disabled: true }],
+      tipo_documentos: [
+        { value: null, text: "Seleccione un tipo", disabled: true },
+      ],
       show1: false,
       encabezados: [
         { text: "Tipo de identificación", value: "tipo_identificacion" },
@@ -33,7 +31,7 @@ export default {
         { text: "Correo", value: "correo" },
         { text: "Rol", value: "rol" },
         { text: "Celular", value: "celular" },
-        { text: "Acciones", value: "acciones", sortable: false }
+        { text: "Acciones", value: "acciones", sortable: false },
       ],
       usuarios: [],
       editedIndex: -1,
@@ -45,7 +43,7 @@ export default {
         correo: "",
         rol: null,
         celular: "",
-        clave: ""
+        clave: "",
       },
       usuario: {
         identificacion: "",
@@ -55,38 +53,37 @@ export default {
         correo: "",
         rol: null,
         celular: "",
-        clave: ""
+        clave: "",
       },
-      mensaje: null
+      mensaje: null,
     };
   },
   computed: {
-    formTitle () {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+    formTitle() {
+      return this.editedIndex === -1 ? "New Item" : "Edit Item";
     },
   },
 
   watch: {
-    dialog (val) {
-      val || this.close()
+    dialog(val) {
+      val || this.close();
     },
-    dialogDelete (val) {
-      val || this.closeDelete()
+    dialogDelete(val) {
+      val || this.closeDelete();
     },
   },
 
-  methods: { 
+  methods: {
     guardarUsuario() {
       if (this.$refs.form.validate()) {
-        console.log(this.usuario);
         let url = config.url_api;
         axios
           .post(url + "usuarios", this.usuario)
-          .then(respuesta => {
+          .then((respuesta) => {
             this.reset();
             this.cargarUsuarios();
           })
-          .catch(error => {});
+          .catch((error) => {});
       }
     },
 
@@ -94,22 +91,21 @@ export default {
       let url = config.url_api;
       axios
         .get(url + "usuarios")
-        .then(respuesta => {
+        .then((respuesta) => {
           let data = respuesta.data;
           if (data.ok) {
             this.usuarios = data.info;
-            for(let i in this.usuarios){
-              this.usuarios[i].acciones = true
+            for (let i in this.usuarios) {
+              this.usuarios[i].acciones = true;
             }
           }
           this.toast = true;
           this.mensaje = data.mensaje;
         })
-        .catch(error => {
+        .catch((error) => {
           this.toast = true;
           this.mensaje = "Ha ocurrido un error, intenta de nuevo. ";
         });
-
     },
 
     cargarRoles() {
@@ -150,27 +146,25 @@ export default {
 
     eliminarUsuario() {
       let url = config.url_api;
-      console.log(this.editedItem);
       axios
         .delete(`${url}usuarios/${this.editedItem.identificacion}`)
         .then((response) => {
           this.usuarios.splice(this.editedIndex, 1);
-          this.closeDelete()
+          this.closeDelete();
         })
         .catch((error) => {
           console.log(error);
         });
-        this.closeDelete()
+      this.closeDelete();
     },
 
     cargarUsuario(item) {
-      this.validacion_actualizar = true
+      this.validacion_actualizar = true;
       let url = config.url_api;
       axios
         .get(`${url}usuarios/${item.identificacion}`)
         .then((response) => {
           var datos = response.data.info;
-          console.log(datos);
           this.usuario.tipo_identificacion = datos[0].tipo_identificacion;
           this.usuario.identificacion = datos[0].identificacion;
           this.usuario.nombres = datos[0].nombres;
@@ -192,7 +186,6 @@ export default {
         axios
           .put(`${url}usuarios/${this.usuario.identificacion}`, this.usuario)
           .then((response) => {
-            console.log(response);
             let position = this.usuarios.findIndex(
               (usuario) => usuario.identificacion == this.usuario.identificacion
             );
@@ -205,11 +198,10 @@ export default {
               correo: "",
               rol: null,
               celular: "",
-              clave: ""
+              clave: "",
             };
             this.validacion_actualizar = false;
             this.reset();
-          
           })
           .catch((error) => {
             console.log(error);
@@ -217,34 +209,28 @@ export default {
       } else {
         alert("LLene todos los campos correctamente");
       }
-    
     },
 
-    deleteItem (item) {
-      this.editedIndex = this.usuarios.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialogDelete = true
+    deleteItem(item) {
+      this.editedIndex = this.usuarios.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.dialogDelete = true;
     },
 
-    deleteItemConfirm () {
-      this.usuarios.splice(this.editedIndex, 1)
-      this.closeDelete()
-    },
-
-    close () {
-      this.dialog = false
+    close() {
+      this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
     },
 
-    closeDelete () {
-      this.dialogDelete = false
+    closeDelete() {
+      this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
     },
 
     reset() {
@@ -252,8 +238,6 @@ export default {
     },
     resetValidation() {
       this.$refs.form.resetValidation();
-    }
- 
-    
+    },
   },
 };

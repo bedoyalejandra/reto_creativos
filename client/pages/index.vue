@@ -35,7 +35,12 @@
           :rules="reglaCorreo"
           label="Correo"
         ></v-text-field>
-        <v-select v-model="usuario.rol" :items="roles" label="Rol"></v-select>
+        <v-select
+          v-model="usuario.rol"
+          :items="roles"
+          label="Rol"
+          :rules="[(v) => !!v || 'El rol es obligatorio']"
+        ></v-select>
 
         <v-text-field
           v-model="usuario.celular"
@@ -54,23 +59,18 @@
         ></v-text-field>
 
         <v-btn
-          color="success"
-          class="mr-4"
+          color="primary"
+          block
           v-if="!validacion_actualizar"
           @click="guardarUsuario"
           >Guardar</v-btn
         >
 
-        <v-btn color="success" class="mr-4" @click="editarUsuario" v-else
+        <v-btn color="primary" block @click="editarUsuario" v-else
           >Editar</v-btn
         >
       </v-form>
     </template>
-
-    <v-snackbar v-model="toast">
-      {{ mensaje }}
-      <v-btn color="pink" text @click="toast = false">Close</v-btn>
-    </v-snackbar>
 
     <template>
       <v-data-table
@@ -79,28 +79,23 @@
         class="elevation-1"
       >
         <template v-slot:top>
-          <v-toolbar flat>
-            <v-divider class="mx-4" inset vertical></v-divider>
-            <v-spacer></v-spacer>
-
-            <v-dialog v-model="dialogDelete" max-width="500px">
-              <v-card>
-                <v-card-title class="headline"
-                  >¿Está seguro de eliminar este usuario?</v-card-title
+          <v-dialog v-model="dialogDelete" max-width="500px">
+            <v-card>
+              <v-card-title class="headline"
+                >¿Está seguro de eliminar este usuario?</v-card-title
+              >
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="closeDelete"
+                  >Cancel</v-btn
                 >
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="closeDelete"
-                    >Cancel</v-btn
-                  >
-                  <v-btn color="blue darken-1" text @click="eliminarUsuario"
-                    >OK</v-btn
-                  >
-                  <v-spacer></v-spacer>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </v-toolbar>
+                <v-btn color="blue darken-1" text @click="eliminarUsuario"
+                  >OK</v-btn
+                >
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </template>
 
         <template v-slot:[`item.acciones`]="{ item }">
