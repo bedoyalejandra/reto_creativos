@@ -5,10 +5,13 @@ import Vue from "vue";
 
 export default {
   beforeMount() {
-    this.cargar_usuarios();
+    this.cargarUsuarios();
   },
   data() {
     return {
+      validacion_actualizar: false,
+      dialog: false,
+      dialogDelete: false,
       valid: false,
       toast: false,
       usuario: {},
@@ -17,8 +20,9 @@ export default {
         v => !!v || "El campo es obligatorio.",
         v => /.+@.+\..+/.test(v) || "El correo no es correcto."
       ],
-      tipo_documentos: [1, 2, 3, 4],
-      roles: [1, 2, 3],
+    
+      tipo_documentos: [1, 2, 3, 4],  
+      roles: [{ value: null, text: "Seleccione un rol", disabled: true }],
       show1: false,
       encabezados: [
         { text: "Tipo de identificación", value: "tipo_identificacion" },
@@ -27,28 +31,65 @@ export default {
         { text: "Apellidos", value: "apellidos" },
         { text: "Correo", value: "correo" },
         { text: "Rol", value: "rol" },
-        { text: "Celular", value: "celular" }
+        { text: "Celular", value: "celular" },
+        { text: "Acciones", value: "acciones", sortable: false }
       ],
       usuarios: [],
+      editedIndex: -1,
+      editedItem: {
+        identificacion: "",
+        tipo_identificacion: 3,
+        nombres: "",
+        apellidos: "",
+        correo: "",
+        rol: 1,
+        celular: "",
+        clave: ""
+      },
+      usuario: {
+        identificacion: "",
+        tipo_identificacion: 3,
+        nombres: "",
+        apellidos: "",
+        correo: "",
+        rol: 1,
+        celular: "",
+        clave: ""
+      },
       mensaje: null
     };
   },
+  computed: {
+    formTitle () {
+      return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+    },
+  },
+
+  watch: {
+    dialog (val) {
+      val || this.close()
+    },
+    dialogDelete (val) {
+      val || this.closeDelete()
+    },
+  },
 
   methods: { 
-    guardar_usuario() {
+    guardarUsuario() {
       if (this.$refs.form.validate()) {
         console.log(this.usuario);
         let url = config.url_api;
         axios
           .post(url + "usuarios", this.usuario)
           .then(respuesta => {
-            console.log(respuesta);
+            this.reset();
+            this.cargarUsuarios();
           })
           .catch(error => {});
       }
     },
 
-    cargar_usuarios() {
+    cargarUsuarios() {
       let url = config.url_api;
       axios
         .get(url + "usuarios")
@@ -56,6 +97,9 @@ export default {
           let data = respuesta.data;
           if (data.ok) {
             this.usuarios = data.info;
+            for(let i in this.usuarios){
+              this.usuarios[i].acciones = true
+            }
           }
           this.toast = true;
           this.mensaje = data.mensaje;
@@ -64,99 +108,71 @@ export default {
           this.toast = true;
           this.mensaje = "Ha ocurrido un error, intenta de nuevo. ";
         });
+
     },
 
-    cargar_roles() {
+    eliminarUsuario() {
       let url = config.url_api;
+      console.log(this.editedItem);
       axios
-        .get(url + "usuarios")
-        .then(respuesta => {
-          let data = respuesta.data;
-          if (data.ok) {
-            this.usuarios = data.info;
-          }
-          this.toast = true;
-          this.mensaje = data.mensaje;
-        })
-        .catch(error => {
-          this.toast = true;
-          this.mensaje = "Ha ocurrido un error, intenta de nuevo. ";
-        });
-    },
-
-    mostrar_roles() {
-      axios
-        .get(this.url + "roles", {
-          headers: { token: this.token },
-        })
+        .delete(`${url}usuarios/${this.editedItem.identificacion}`)
         .then((response) => {
-          let datos = response.data.info;
-          for (let i in datos) {
-            let temp = { value: "", text: "" };
-            temp.value = datos[i].id;
-            temp.text = datos[i].nombre;
-            this.lista_roles.push(temp);
-          }
+          this.usuarios.splice(this.editedIndex, 1);
+          this.closeDelete()
         })
         .catch((error) => {
           console.log(error);
         });
+        this.closeDelete()
     },
 
-    cargar_usuario({ item }) {
+    cargarUsuario(item) {
       this.validacion_actualizar = true
+      let url = config.url_api;
       axios
-        .get(`${this.url}usuarios/${item.id}`, {
-          headers: { token: this.token },
-        })
+        .get(`${url}usuarios/${item.identificacion}`)
         .then((response) => {
           var datos = response.data.info;
-
-          this.inEdition = true;
-          this.usuario.id = datos[0].id;
-          this.usuario.nombre = datos[0].nombre;
-          this.usuario.apellido = datos[0].apellidos;
-          this.usuario.edad = datos[0].edad;
-          //this.usuario.clave = datos[0].clave;
+          console.log(datos);
+          this.usuario.tipo_identificacion = datos[0].tipo_identificacion;
+          this.usuario.identificacion = datos[0].identificacion;
+          this.usuario.nombres = datos[0].nombres;
+          this.usuario.apellidos = datos[0].apellidos;
+          this.usuario.clave = datos[0].clave;
           this.usuario.correo = datos[0].correo;
-          this.usuario.ciudad = datos[0].ciudad;
           this.usuario.rol = datos[0].rol;
-          this.usuario.ocupacion = datos[0].ocupacion;
+          this.usuario.celular = datos[0].celular;
           this.usuario.acciones = true;
-          this.usuario.primera_vez = datos[0].primera_vez;
         })
         .catch((error) => {
           console.log(error);
         });
     },
 
-    actualizar_usuario() {
-      if (this.usuario.id.length > 0 && this.usuario.nombre.length > 0 && this.usuario.apellido.length > 0
-        && this.usuario.correo.length > 0 && this.usuario.clave.length > 0) {
+    editarUsuario() {
+      if (this.$refs.form.validate()) {
+        let url = config.url_api;
         axios
-          .put(`${this.url}usuarios/${this.usuario.id}`, this.usuario, {
-            headers: { token: this.token },
-          })
+          .put(`${url}usuarios/${this.usuario.identificacion}`, this.usuario)
           .then((response) => {
             console.log(response);
-            let position = this.lista_usuarios.findIndex(
-              (usuario) => usuario.id == this.usuario.id
+            let position = this.usuarios.findIndex(
+              (usuario) => usuario.identificacion == this.usuario.identificacion
             );
-            this.lista_usuarios.splice(position, 1, this.usuario);
-            this.inEdition = false;
+            this.usuarios.splice(position, 1, this.usuario);
             this.usuario = {
-              id: "",
-              nombre: "",
-              apellido: "",
-              edad: 0,
+              identificacion: "",
+              tipo_identificacion: 3,
+              nombres: "",
+              apellidos: "",
               correo: "",
-              clave: "",
-              ciudad: "",
-              ocupacion: null,
-              rol: 0,
-              acciones: true,
+              rol: 1,
+              celular: "",
+              clave: ""
             };
             this.validacion_actualizar = false;
+            this.reset();
+          
           })
           .catch((error) => {
             console.log(error);
@@ -164,7 +180,43 @@ export default {
       } else {
         alert("LLene todos los campos correctamente");
       }
-      
+    
     },
+
+    deleteItem (item) {
+      this.editedIndex = this.usuarios.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialogDelete = true
+    },
+
+    deleteItemConfirm () {
+      this.usuarios.splice(this.editedIndex, 1)
+      this.closeDelete()
+    },
+
+    close () {
+      this.dialog = false
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
+    },
+
+    closeDelete () {
+      this.dialogDelete = false
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
+    },
+
+    reset() {
+      this.$refs.form.reset();
+    },
+    resetValidation() {
+      this.$refs.form.resetValidation();
+    }
+ 
+    
   },
 };
