@@ -11,8 +11,14 @@ app.use(cors());
 const vs = "/api/v1/";
 
 const ruta_usuarios = require("./routes/usuarios");
+const ruta_roles = require("./routes/roles");
+const ruta_tipos = require("./routes/tipos_identificacion");
+
 
 app.use(vs, ruta_usuarios);
+app.use(vs, ruta_roles);
+app.use(vs, ruta_tipos);
+
 
 app.use('/', (req, res) => {
   res.status(404).send({

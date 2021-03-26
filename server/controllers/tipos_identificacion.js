@@ -30,7 +30,7 @@ let guardar_tipo_identificacion = async tipo_identificacion => {
   return respuesta;
 };
 
-let consultar_tipo_identificaciones = async () => {
+let consultar_tipos_identificacion = async () => {
   let _service = new ServicePG();
   let sql = `SELECT * FROM tipos_identificacion`;
   let respuesta = await _service.runSql(sql);
@@ -68,7 +68,7 @@ let editar_tipo_identificacion = async (tipo_identificacion, id) => {
 };
 module.exports = { validar_tipo_identificacion,
                     guardar_tipo_identificacion,
-                    consultar_tipo_identificaciones,
+                    consultar_tipos_identificacion,
                     consultar_tipo_identificacion,
                     eliminar_tipo_identificacion,
                     editar_tipo_identificacion };

@@ -5,6 +5,8 @@ import Vue from "vue";
 
 export default {
   beforeMount() {
+    this.cargarRoles();
+    this.cargarTipos();
     this.cargarUsuarios();
   },
   data() {
@@ -17,12 +19,11 @@ export default {
       usuario: {},
       reglas: [v => !!v || "El campo es obligatorio."],
       reglaCorreo: [
-        v => !!v || "El campo es obligatorio.",
         v => /.+@.+\..+/.test(v) || "El correo no es correcto."
       ],
     
-      tipo_documentos: [1, 2, 3, 4],  
       roles: [{ value: null, text: "Seleccione un rol", disabled: true }],
+      tipo_documentos: [{ value: null, text: "Seleccione un tipo", disabled: true }],
       show1: false,
       encabezados: [
         { text: "Tipo de identificación", value: "tipo_identificacion" },
@@ -38,21 +39,21 @@ export default {
       editedIndex: -1,
       editedItem: {
         identificacion: "",
-        tipo_identificacion: 3,
+        tipo_identificacion: null,
         nombres: "",
         apellidos: "",
         correo: "",
-        rol: 1,
+        rol: null,
         celular: "",
         clave: ""
       },
       usuario: {
         identificacion: "",
-        tipo_identificacion: 3,
+        tipo_identificacion: null,
         nombres: "",
         apellidos: "",
         correo: "",
-        rol: 1,
+        rol: null,
         celular: "",
         clave: ""
       },
@@ -111,6 +112,42 @@ export default {
 
     },
 
+    cargarRoles() {
+      let url = config.url_api;
+      axios
+        .get(url + "roles")
+        .then((response) => {
+          let datos = response.data.info;
+          for (let i in datos) {
+            let temp = { value: "", text: "" };
+            temp.value = datos[i].id;
+            temp.text = datos[i].nombre;
+            this.roles.push(temp);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+
+    cargarTipos() {
+      let url = config.url_api;
+      axios
+        .get(url + "tipos_identificacion")
+        .then((response) => {
+          let datos = response.data.info;
+          for (let i in datos) {
+            let temp = { value: "", text: "" };
+            temp.value = datos[i].id;
+            temp.text = datos[i].nombre;
+            this.tipo_documentos.push(temp);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+
     eliminarUsuario() {
       let url = config.url_api;
       console.log(this.editedItem);
@@ -162,11 +199,11 @@ export default {
             this.usuarios.splice(position, 1, this.usuario);
             this.usuario = {
               identificacion: "",
-              tipo_identificacion: 3,
+              tipo_identificacion: null,
               nombres: "",
               apellidos: "",
               correo: "",
-              rol: 1,
+              rol: null,
               celular: "",
               clave: ""
             };

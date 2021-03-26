@@ -67,7 +67,7 @@ let ver_usuario = async (identificacion) => {
   let sql = `SELECT usuarios.identificacion, 
                     tipos_identificacion.nombre as "tipo_identificacion", 
                     usuarios.nombres, usuarios.apellidos, usuarios.correo, 
-                    roles.nombre as "rol", usuarios.celular 
+                    roles.nombre as "rol", usuarios.celular
                     FROM usuarios 
                     INNER JOIN roles ON usuarios.rol = roles.id 
                     INNER JOIN tipos_identificacion ON usuarios.tipo_identificacion = tipos_identificacion.id
